@@ -100,11 +100,14 @@ class MyGame(arcade.Window):
         # click mode
         elif symbol == arcade.key.A:
             self.click_mode = 'add'
-            if modifiers & 0b1:  # Shift+A cycles through Bot factories
+            if modifiers & arcade.key.MOD_SHIFT:  # Shift+A cycles through Bot factories
                 self.bot_factories.next()
             print('Current Bot add factory: %s' % self.bot_factories.get()[1].__name__)
         elif symbol == arcade.key.G:
-            self.click_mode = 'goal'
+            if modifiers & arcade.key.MOD_SHIFT:
+                self.click_mode = 'goal_reverse'
+            else:
+                self.click_mode = 'goal'
         elif symbol == arcade.key.D:
             self.click_mode = 'delete'
         # move
@@ -119,12 +122,14 @@ class MyGame(arcade.Window):
         super().on_mouse_press(x, y, button, modifiers)
         print('mouse click', x, y, button)
         if button == 1:
-            if self.click_mode == 'goal':
+            if self.click_mode in ('goal', 'goal_reverse'):
                 print('changing goal')
                 # change goal
                 goal = _Vec2(x, y)
                 for bot in [b for b in self.bots if type(b) is bots.Bot]:
                     bot.set_goal(goal)
+                    if self.click_mode == 'goal_reverse':
+                        bot.angle += 180
             elif self.click_mode == 'add':
                 print('adding bot....')
                 # add new bot
