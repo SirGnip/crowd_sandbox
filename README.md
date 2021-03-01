@@ -24,10 +24,12 @@ interact with the simulation (pause time, advance frame by frame, add and remove
 # Project Setup
 
     # Create venv
-    python -m venv venv
-
+    py -3 -m venv venv
+    source venv/Scripts/activate
     # Install dependencies
     pip install -r requirements.txt
+    cd src/
+    python -m crowd.crowd_sandbox
 
 PyCharm
 

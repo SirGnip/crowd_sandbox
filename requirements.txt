@@ -1,3 +1,5 @@
-arcade=2.2.1
+arcade==2.2.1
+# arcade doesn't seem to set version of pytiled-parser so set it explicitly here
+pytiled-parser==0.9.4
 mypy==0.761
 pytest==5.3.1
