@@ -4,6 +4,7 @@ SUMMARY: Simple crowd simulation. Multiple "Bots" with different logic that cont
 Observation: It is common for Bots to deadlock against each other and stop moving. It isn't worth making more
 sophisticated collision resolution logic as this is just an experiment.
 """
+import random
 import sys
 import time
 from typing import Optional
@@ -160,6 +161,7 @@ class MyGame(arcade.Window):
 
 
 if __name__ == '__main__':
+    random.seed(12345)  # repeatable randomness
     game = MyGame()
     game.set_location(600, 50)
     arcade.run()
