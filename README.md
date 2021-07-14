@@ -35,3 +35,14 @@ PyCharm
 
 - Set `venv/` as project interpreter in PyCharm
 - Mark `src/` directory as "sources root"
+
+
+# Repo layout
+
+- `src/`
+    - `minimal/`: minimal example apps comparing the use of synchronous code, threading, multiprocessing and asyncio
+    - `common/`: shared utilities
+    - `crowd/`: original implementation of crowd_simulation 
+    - `crowd_thread/`: thread-based implementation of crowd_simulation
+    - `crowd_multiproc/`: multiprocessing-based implementation of crowd_simulation
+    - `crowd_async/`: asyncio-based implementation of crowd_simulation
