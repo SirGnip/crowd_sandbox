@@ -19,7 +19,6 @@ class Bot(arcade.Sprite):
         self.angle = 0.0
         self.orig_x: float = 0
         self.orig_y: float = 0
-        self.is_blocked: bool = False
         square_texture = arcade.make_soft_square_texture(10, color, 255, 255)
         self.append_texture(square_texture)
         self.set_texture(0)
@@ -46,8 +45,7 @@ class Bot(arcade.Sprite):
     def update(self):
         super().update()
         self.save_pos()
-        if not self.is_blocked:
-            self.step_forward(2.0)
+        self.step_forward(2.0)
         overlaps = self.collides_with_list(self.bots)
         if len(overlaps) > 0:  # if movement would have this Sprite overlap another Sprite, cancel movement
             self.restore_pos()
@@ -93,8 +91,7 @@ class BounceBot(Bot):
     """Bot that reverses direction with it touches another Bot"""
     def update(self):
         self.save_pos()
-        if not self.is_blocked:
-            self.step_forward(2.0)
+        self.step_forward(2.0)
         overlaps = self.collides_with_list(self.bots)
         if len(overlaps) > 0:  # if movement would have this Sprite overlap another Sprite, cancel movement and reflect
             self.restore_pos()
@@ -119,7 +116,7 @@ class RunAwayBot(Bot):
             if self.frame_count <= 0:
                 self.state = "normal"
                 self.angle += 180
-        if self.state != "waiting" and not self.is_blocked:
+        if self.state != "waiting":
             if self.state == "normal":
                 self.step_forward(1.0)
             elif self.state == "bumped":

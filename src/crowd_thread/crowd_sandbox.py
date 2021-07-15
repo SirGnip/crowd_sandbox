@@ -54,8 +54,8 @@ class MyGame(arcade.Window):
 
             goal = _Vec2(700, 300)
             seq = 0
-            for x in range(50, 150, 15):
-                for y in range(50, 550, 15):
+            for x in range(50, 150, 25):
+                for y in range(50, 550, 25):
                     b = bots.Bot(x, y, self.bots, arcade.color.RED, self)
                     b.id = seq
                     seq += 1
