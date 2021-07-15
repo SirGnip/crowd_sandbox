@@ -18,9 +18,14 @@ class Bot(arcade.Sprite):
         self.center_x = x
         self.center_y = y
         self.angle = 0.0
+        self.speed = 2.0
         self.orig_x: float = 0
         self.orig_y: float = 0
         self.is_blocked: bool = False
+        self.set_color(color)
+
+    def set_color(self, color):
+        self.textures = []
         square_texture = arcade.make_soft_square_texture(10, color, 255, 255)
         self.append_texture(square_texture)
         self.set_texture(0)
@@ -48,27 +53,39 @@ class Bot(arcade.Sprite):
         super().update()
         self.save_pos()
         if not self.is_blocked:
-            self.step_forward(2.0)
+            self.step_forward(self.speed)
         overlaps = self.collides_with_list(self.bots)
         if len(overlaps) > 0:  # if movement would have this Sprite overlap another Sprite, cancel movement
             self.restore_pos()
 
 
+async def is_true(predicate):
+    """utility coroutine that blocks until the given predicate evaluates to true, returning the argument."""
+    try:
+        while not predicate():
+            await asyncio.sleep(0)
+    except Exception as exc:
+        # Try to make exception more obvious.
+        # Very easy for a typo in a predicate to not generate a visible error (probably because I don't
+        # understand coroutines/Tasks fully yet).
+        print('ERROR! Exception in is_true:', exc)
+
+
 class AsyncBot(Bot):
-    """A very rough initial attempt at creating an async bot"""
     def __init__(self, x, y, bots, color):
         super().__init__(x, y, bots, color)
+        self.frames = 0
         self.task = asyncio.create_task(self.async_update())
 
-    async def async_update(self):
-        dly = 0.5
-        while True:
-            self.angle = 0
-            await asyncio.sleep(dly)
-            self.angle = 90
-            await asyncio.sleep(dly)
-            self.angle = 45
-            await asyncio.sleep(dly)
+    async def until_frames_elapsed(self, elapsed):
+        end_at_frame = self.frames + elapsed
+        while self.frames < end_at_frame:
+            await asyncio.sleep(0)
+
+    def update(self):
+        super().update()
+        self.frames += 1
+
 
 class StationaryBot(Bot):
     """A Bot that just stays in one place (for creating obstacles, etc)"""
@@ -76,18 +93,12 @@ class StationaryBot(Bot):
         pass
 
 
-class OctWalkBot(Bot):
-    """Bot walks in an octagon path"""
-    def __init__(self, x, y, bots, color):
-        super().__init__(x, y, bots, color)
-        self.frame_count = 0
-
-    def update(self):
-        super().update()
-        self.frame_count += 1
-        if self.frame_count > 20:
-            self.frame_count = 0
-            self.angle += 45
+class AsyncOctWalkBot(AsyncBot):
+    """Uses frame counts with a custom coro, not sleep/time. More deterministic."""
+    async def async_update(self):
+        while True:
+            await self.until_frames_elapsed(20)
+            self.angle = (self.angle + 45) % 360
 
 
 class RandomWalkBot(Bot):

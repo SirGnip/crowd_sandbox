@@ -45,7 +45,7 @@ class MyGame(arcade.Window):
             self.bot_factories = utl.Cycler((
                 (arcade.color.RED, bots.Bot),
                 (arcade.color.DARK_GRAY, bots.StationaryBot),
-                (arcade.color.YELLOW, bots.OctWalkBot),
+                (arcade.color.YELLOW, bots.AsyncOctWalkBot),
                 (arcade.color.GREEN, bots.RandomWalkBot),
                 (arcade.color.BLUE, bots.BounceBot),
                 (arcade.color.PURPLE, bots.RunAwayBot),
@@ -62,7 +62,7 @@ class MyGame(arcade.Window):
                     self.bots.append(b)
             self.bots[9].angle = 355
 
-            self.bots.append(bots.OctWalkBot(400, 300, self.bots, arcade.color.YELLOW))
+            self.bots.append(bots.AsyncOctWalkBot(400, 300, self.bots, arcade.color.YELLOW))
             self.bots.append(bots.RunAwayBot(500, 350, self.bots, arcade.color.PURPLE))
             self.bots.append(bots.RunAwayBot(475, 340, self.bots, arcade.color.PURPLE))
 
@@ -77,9 +77,6 @@ class MyGame(arcade.Window):
 
             for y in range(200, 400, 20):
                 self.bots.append(bots.StationaryBot(723, y, self.bots, arcade.color.DARK_GRAY))
-
-            b = bots.AsyncBot(10, 10, self.bots, arcade.color.PINK)
-            self.bots.append(b)
 
             print(f'There are {len(self.bots)} starting Bots')
 
@@ -216,7 +213,7 @@ async def arcade_event_loop():
             window.dispatch_event('on_draw')
             window.flip()
         await asyncio.sleep(0)
-        if fps.frames % 500 == 499:
+        if fps.frames % 50000 == 49999:
             print('event loop', fps.get_fps())
 
 
