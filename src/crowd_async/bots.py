@@ -21,7 +21,6 @@ class Bot(arcade.Sprite):
         self.speed = 2.0
         self.orig_x: float = 0
         self.orig_y: float = 0
-        self.is_blocked: bool = False
         self.set_color(color)
 
     def set_color(self, color):
@@ -52,11 +51,14 @@ class Bot(arcade.Sprite):
     def update(self):
         super().update()
         self.save_pos()
-        if not self.is_blocked:
-            self.step_forward(self.speed)
+        self.step_forward(self.speed)
         overlaps = self.collides_with_list(self.bots)
         if len(overlaps) > 0:  # if movement would have this Sprite overlap another Sprite, cancel movement
             self.restore_pos()
+            self.on_collided()
+
+    def on_collided(self):
+        pass
 
 
 async def is_true(predicate):
@@ -93,7 +95,7 @@ class StationaryBot(Bot):
         pass
 
 
-class AsyncOctWalkBot(AsyncBot):
+class OctWalkBot(AsyncBot):
     """Uses frame counts with a custom coro, not sleep/time. More deterministic."""
     async def async_update(self):
         while True:
@@ -101,61 +103,42 @@ class AsyncOctWalkBot(AsyncBot):
             self.angle = (self.angle + 45) % 360
 
 
-class RandomWalkBot(Bot):
+class RandomWalkBot(AsyncBot):
     """Bot walks in random directions for random lengths of time"""
-    def __init__(self, x, y, bots, color):
-        super().__init__(x, y, bots, color)
-        self.frame_count = 0
-        self.next_change_frame = 0
-
-    def update(self):
-        self.frame_count += 1
-        if self.frame_count > self.next_change_frame:
-            self.frame_count = 0
-            self.next_change_frame = random.randint(10, 20)
+    async def async_update(self):
+        while True:
             self.angle = random.randint(0, 360)
-        super().update()
+            await self.until_frames_elapsed(random.randint(10, 20))
 
 
 class BounceBot(Bot):
     """Bot that reverses direction with it touches another Bot"""
-    def update(self):
-        self.save_pos()
-        if not self.is_blocked:
-            self.step_forward(2.0)
-        overlaps = self.collides_with_list(self.bots)
-        if len(overlaps) > 0:  # if movement would have this Sprite overlap another Sprite, cancel movement and reflect
-            self.restore_pos()
-            self.angle += 180
+    def on_collided(self):
+        self.angle += 180
 
 
-class RunAwayBot(Bot):
+class RunAwayBot(AsyncBot):
     """Moves slowly. When it gets bumped, it runs away quickly then stops. After a time it moves again."""
-    def __init__(self, x, y, bots, color):
-        super().__init__(x, y, bots, color)
-        self.state = 'normal'
-        self.frame_count = 0
+    async def async_update(self):
         self.angle = 180
+        self.collided = False
+        while True:
+            # normal
+            self.speed = 1.0
+            await is_true(lambda: self.collided)
+            self.collided = False
 
-    def update(self):
-        self.save_pos()
-        if self.state == "bumped" and self.frame_count <= 0:
-            self.state = "waiting"
-            self.frame_count = 60
-        elif self.state == "waiting":
-            self.frame_count -= 1
-            if self.frame_count <= 0:
-                self.state = "normal"
-                self.angle += 180
-        if self.state != "waiting" and not self.is_blocked:
-            if self.state == "normal":
-                self.step_forward(1.0)
-            elif self.state == "bumped":
-                self.step_forward(5.0)
-                self.frame_count -= 1
-        overlaps = self.collides_with_list(self.bots)
-        if len(overlaps) > 0:  # if movement would have this Sprite overlap another Sprite, cancel movement and reflect
-            self.restore_pos()
+            # bumped
+            self.speed = 5.0
             self.angle += 180
-            self.state = 'bumped'
-            self.frame_count = 15
+            await self.until_frames_elapsed(15)
+
+            # waiting
+            self.speed = 0.0
+            self.angle += 180
+            await self.until_frames_elapsed(60)
+
+    def on_collided(self):
+        self.collided = True
+
+

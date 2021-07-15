@@ -45,7 +45,7 @@ class MyGame(arcade.Window):
             self.bot_factories = utl.Cycler((
                 (arcade.color.RED, bots.Bot),
                 (arcade.color.DARK_GRAY, bots.StationaryBot),
-                (arcade.color.YELLOW, bots.AsyncOctWalkBot),
+                (arcade.color.YELLOW, bots.OctWalkBot),
                 (arcade.color.GREEN, bots.RandomWalkBot),
                 (arcade.color.BLUE, bots.BounceBot),
                 (arcade.color.PURPLE, bots.RunAwayBot),
@@ -62,7 +62,7 @@ class MyGame(arcade.Window):
                     self.bots.append(b)
             self.bots[9].angle = 355
 
-            self.bots.append(bots.AsyncOctWalkBot(400, 300, self.bots, arcade.color.YELLOW))
+            self.bots.append(bots.OctWalkBot(400, 300, self.bots, arcade.color.YELLOW))
             self.bots.append(bots.RunAwayBot(500, 350, self.bots, arcade.color.PURPLE))
             self.bots.append(bots.RunAwayBot(475, 340, self.bots, arcade.color.PURPLE))
 
